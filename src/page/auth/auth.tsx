@@ -1,10 +1,7 @@
-import { useContext } from "react"
-import { AuthContext } from "../../context/authContext"
 import { api } from "../../service/axios"
 import { useNavigate } from "react-router-dom"
 
 export function Auth() {
-  const { setToken } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -20,7 +17,7 @@ export function Auth() {
       email,
       password
     })
-    setToken(response.data.token)
+    localStorage.setItem('token', response.data.token)
     navigate('/home')
   }
   return (
