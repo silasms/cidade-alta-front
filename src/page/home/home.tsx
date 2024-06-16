@@ -102,7 +102,9 @@ export function Home() {
           })}
         </div>
       </div>
-      <button onClick={reward}>Resgatar um emblema</button>
+      <div className="flex justify-end mt-4">
+        <button onClick={reward} className="px-4 py-2 bg-blue-300 rounded-xl hover:scale-105 ease-in-out duration-300">Resgatar um emblema</button>
+      </div>
     </main>
   )
 }
