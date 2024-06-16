@@ -1,40 +1,52 @@
-import React, { Dispatch, SetStateAction, createContext, useEffect, useState } from "react";
+import React, { createContext, useState } from "react";
 import { api } from "../service/axios";
 
 interface AuthContextValue {
-  token: string
-  signin: (token: string) => object
-  verifyAuth: () => void
-  setToken: Dispatch<SetStateAction<string>>
+  signin: () => Promise<string>
+  user: User
+  setUser: React.Dispatch<React.SetStateAction<{ id: string, name: string, password: string, tags: UserTag[]}>>
+}
+
+interface User {
+  id: string
+  name: string
+  password: string
+  tags: UserTag[]
+}
+
+interface UserTag {
+  id: string
+  tagId: string
+  userId: string
+  tag: Tag
+}
+
+interface Tag {
+  categoryId: number
+  id: string
+  image: string
+  name: string
+  slug: string
 }
 
 const AuthContext = createContext({} as AuthContextValue)
 
 function AuthProvider({ children }: { children: React.ReactNode}) {
-  const [ token, setToken ] = useState('')
+  const [ user, setUser ] = useState({} as User)
 
-  const signin = async (token: string) => {
-    if (token !== '') return
-    const response = await api.post("/users/validatetoken", { token })
-    setToken(token)
-    return response.data
+  const signin = async (): Promise<string> => {
+    const response = await api.post("/users/validatetoken", { token: localStorage.getItem('token') })
+    const userId = response.data.id
+    localStorage.setItem('id', userId)
+    return userId
   }
-
-  const verifyAuth = async () => {
-    await signin(token)
-  }
-
-  useEffect(() => {
-    verifyAuth();
-  }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        token: token,
         signin,
-        verifyAuth,
-        setToken
+        user,
+        setUser
       }}
     >
       {children}
