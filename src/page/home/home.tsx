@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../service/axios";
 import { OpenGift } from "./components/openGift";
 import { Tag } from "./components/tag";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 interface Tag {
   id: string
@@ -25,28 +27,41 @@ export function Home() {
   const navigate = useNavigate()
 
   const authenticate = async () => {
-    const result = await signin()
-    if (!result) navigate('/login')
-    const id = localStorage.getItem('id')
-    const { data } = await api.get('/users/' + id, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token')
+    try {
+      if (localStorage.getItem('token') === null) return navigate('/login')
+      const result = await signin()
+      if (!result) navigate('/login')
+      const id = localStorage.getItem('id')
+      const { data } = await api.get('/users/' + id, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      
+      localStorage.setItem('user', JSON.stringify(data))
+      setUser(data)
+      setLoading(false)
+      setUserTags(data.tags)
+    } catch(err) {
+      if (err instanceof AxiosError) {
+        toast.error('Faça o login novamente.')
       }
-    })
-    
-    localStorage.setItem('user', JSON.stringify(data))
-    setUser(data)
-    setLoading(false)
-    setUserTags(data.tags)
+    }
   }
 
   const getTags = async () => {
-    const { data } = await api.get('/tags', {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token')
-      }
-    })
-    setTags(data)
+    try {
+      if (!localStorage.getItem('token')) return
+      const { data } = await api.get('/tags', {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      setTags(data)
+    } catch(err) {
+      if (err instanceof AxiosError)
+        toast.error(err.message)
+    }
   }
 
   const search = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,16 +72,26 @@ export function Home() {
   }
 
   const reward = async () => {
-    const id = localStorage.getItem('id')
-    if (!id) return
-    const { data } = await api.get('/users/reward/' + id, {
-      headers: {
-        Authorization: 'Bearer ' + localStorage.getItem('token')
+    try {
+      const id = localStorage.getItem('id')
+      if (!id) return
+      const { data } = await api.get('/users/reward/' + id, {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      setRewardTag(data.tag)
+      setOpen(true)
+      setUserTags([...userTags, data])
+    } catch(err) {
+      if (userTags.length === tags.length) {
+        toast.error('Você já obtem todos os emblemas.')
+        return
       }
-    })
-    setRewardTag(data.tag)
-    setOpen(true)
-    setUserTags([...userTags, data])
+      if (err instanceof AxiosError) {
+        toast.error(err.message)
+      }
+    }
   }
 
   useEffect(() => {

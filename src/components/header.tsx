@@ -16,7 +16,10 @@ export function Header() {
   }, [])
 
   const logout = () => {
-    navigate('../login');
+    localStorage.removeItem('user')
+    localStorage.removeItem('id')
+    localStorage.removeItem('token')
+    navigate('/login');
   };
   return (
     <div className="w-full h-full bg-slate-100 relative min-w-[500px]">

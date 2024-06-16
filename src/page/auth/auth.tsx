@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"
 import { api } from "../../service/axios"
 import { useNavigate } from "react-router-dom"
 
@@ -13,12 +14,16 @@ export function Auth() {
   }
 
   async function logIn(email: string, password: string) {
-    const response = await api.post('/users/login', {
-      email,
-      password
-    })
-    localStorage.setItem('token', response.data.token)
-    navigate('/home')
+    try {
+      const response = await api.post('/users/login', {
+        email,
+        password
+      })
+      localStorage.setItem('token', response.data.token)
+      navigate('/home')
+    } catch(err) {
+      toast.error('Email ou senha incorreto!')
+    }
   }
   return (
     <main className="bg-gray-200 h-screen w-full">

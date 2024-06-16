@@ -1,6 +1,8 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { api } from '../../service/axios';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 export function Register() {
   const navigate = useNavigate()
@@ -15,13 +17,18 @@ export function Register() {
   }
 
   async function register(email: string, password: string, name: string) {
-    const response = await api.post('/users', {
-      email,
-      password,
-      name
-    })
-    console.log(response.data)
-    navigate('/login')
+    try {
+      await api.post('/users', {
+        email,
+        password,
+        name
+      })
+      navigate('/login')
+      toast.success('Registrado com sucesso!')
+    } catch(err) {
+      if (err instanceof AxiosError)
+        toast.error(err.message)
+    }
   }
   
 
